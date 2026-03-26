@@ -30,7 +30,11 @@ class _BasicPromptScreenState extends ConsumerState<BasicPromptScreen> {
 
   void _updateMessages(List<types.Message> messages) {
     // Convert types.Message to core.Message using JSON
-    final coreMessages = messages.map((m) => core.Message.fromJson(m.toJson())).toList();
+    final coreMessages = messages.map((m) {
+      final json = m.toJson();
+      json['authorId'] = m.author.id;
+      return core.Message.fromJson(json);
+    }).toList();
     _chatController.setMessages(coreMessages);
   }
 
@@ -63,7 +67,7 @@ class _BasicPromptScreenState extends ConsumerState<BasicPromptScreen> {
             return core.User.fromJson(user.toJson());
           }
           return core.User.fromJson(
-            types.User(id: userId, firstName: 'Gemini').toJson(),
+            types.User(id: userId, firstName: 'Gemini', lastName: '').toJson(),
           );
         },
         onMessageSend: (message) {

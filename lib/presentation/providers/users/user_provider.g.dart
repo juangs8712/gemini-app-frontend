@@ -47,7 +47,7 @@ final class GeminiUserProvider extends $FunctionalProvider<User, User, User>
   }
 }
 
-String _$geminiUserHash() => r'75cc5e6f72f562ad7b1f5230d1026b64b5828613';
+String _$geminiUserHash() => r'4541166663beda76ade8871e3c9c0ea1e2160526';
 
 @ProviderFor(user)
 const userProvider = UserProvider._();

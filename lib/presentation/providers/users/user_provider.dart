@@ -10,6 +10,7 @@ User geminiUser(Ref ref) {
     id: 'gemini-id',
     firstName: 'Gemini',
     imageUrl: 'https://picsum.photos/id/179/200/200',
+    lastName: '',
   );
 
   return geminiUser;
