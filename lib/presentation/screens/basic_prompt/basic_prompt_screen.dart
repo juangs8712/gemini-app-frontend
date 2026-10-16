@@ -20,6 +20,7 @@ class BasicPromptScreen extends ConsumerStatefulWidget {
 class _BasicPromptScreenState extends ConsumerState<BasicPromptScreen> {
   late final core.InMemoryChatController _chatController;
 
+  // -----------------------------------------------------
   @override
   void initState() {
     super.initState();
@@ -27,17 +28,44 @@ class _BasicPromptScreenState extends ConsumerState<BasicPromptScreen> {
     final initialMessages = ref.read(basicChatProvider);
     _updateMessages(initialMessages);
   }
+  // -----------------------------------------------------
+  void _updateMessages(List<types.Message> next) {
 
-  void _updateMessages(List<types.Message> messages) {
-    // Convert types.Message to core.Message using JSON
-    final coreMessages = messages.map((m) {
-      final json = m.toJson();
-      json['authorId'] = m.author.id;
-      return core.Message.fromJson(json);
-    }).toList();
-    _chatController.setMessages(coreMessages);
+    final currentIdsInUI = _chatController.messages.map((m) => m.id).toSet();
+    final nextIdsInState = next.map((m) => m.id).toSet();
+
+    // 1. Additions: In State but not in UI
+    for (final m in next) {
+      if (!currentIdsInUI.contains(m.id)) {
+        _chatController.insertMessage(_toCoreMessage(m));
+      }
+    }
+
+    // 2. Updates: In both, but different
+    for (final mNext in next) {
+      if (currentIdsInUI.contains(mNext.id)) {
+        final coreInUI = _chatController.messages.firstWhere((c) => c.id == mNext.id);
+        final coreNext = _toCoreMessage(mNext);
+        // Note: content check depends on Message equality
+        if (coreInUI != coreNext) {
+          _chatController.updateMessage(coreInUI, coreNext);
+        }
+      }
+    }
+
+    // 3. Removals: In UI but not in State
+    final toRemove = _chatController.messages.where((c) => !nextIdsInState.contains(c.id)).toList();
+    for (final m in toRemove) {
+      _chatController.removeMessage(m);
+    }
   }
-
+  // -----------------------------------------------------
+  core.Message _toCoreMessage(types.Message m) {
+    final json = m.toJson();
+    json['authorId'] = m.author.id;
+    return core.Message.fromJson(json);
+  }
+  // -----------------------------------------------------
   @override
   void dispose() {
     _chatController.dispose();
@@ -47,9 +75,7 @@ class _BasicPromptScreenState extends ConsumerState<BasicPromptScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(basicChatProvider, (previous, next) {
-      if (previous != next) {
-        _updateMessages(next);
-      }
+      _updateMessages(next);
     });
 
     final user = ref.watch(userProvider);

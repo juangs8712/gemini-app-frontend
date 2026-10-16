@@ -41,7 +41,7 @@ final class BasicChatProvider
   }
 }
 
-String _$basicChatHash() => r'f15a3455715521deda50d3f77b328a22ddba21aa';
+String _$basicChatHash() => r'f2d80a84b7598a1d241698a5c411f09e5f813da6';
 
 abstract class _$BasicChat extends $Notifier<List<Message>> {
   List<Message> build();
